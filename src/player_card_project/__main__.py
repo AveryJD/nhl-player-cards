@@ -3,7 +3,7 @@
 # ====================================================================================================
 
 # Imports
-from player_card_project.generate_cards import card_generation
+from player_card_project import card_generation
 
 
 

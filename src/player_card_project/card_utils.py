@@ -127,42 +127,62 @@ def get_player_headshot(season: str, team: str, player_id: float) -> Image.Image
             response = requests.get(fallback_url, stream=True, timeout=5)
             img_bytes = response.content
         except requests.RequestException:
-            # Network unavailable — return a blank transparent image
-            img = Image.new("RGBA", (300, 300), (0, 0, 0, 0))
-            return img
+            # Network unavailable
+            img_bytes = None
 
-    img = Image.open(io.BytesIO(img_bytes)).convert("RGBA")
+    if img_bytes is None:
+        # A blank transparent image
+        img = Image.new("RGBA", (300, 300), (0, 0, 0, 0))
+    else:
+        img = Image.open(io.BytesIO(img_bytes)).convert("RGBA")
 
-    img_data = img.getdata()
-    img.putdata([
-        (255, 255, 255, 0) if pixel[:2] == (255, 255, 255) else pixel
-        for pixel in img_data
-    ])
+        img_data = img.getdata()
+        img.putdata([
+            (255, 255, 255, 0) if pixel[:2] == (255, 255, 255) else pixel
+            for pixel in img_data
+        ])
 
     return img
 
 
-def get_rank_and_percentile(player_row: pd.Series, attribute_key: str) -> tuple:
+def get_attribute_column(player_row: pd.Series, attribute_key: str, suffix: str) -> str:
+    """
+    Return the card data column for an attribute, such as 'Total WAR Percentile' for key 'tot' and suffix 'Percentile'.
+    Goalies have their own attribute labels, so the player's position picks the set.
+
+    :param player_row: A series from the card data (needs a 'Position' value)
+    :param attribute_key: The short attribute key used by the card code (e.g. 'tot', 'evo', 'ldg')
+    :param suffix: 'Percentile', 'Rank', or 'History'
+    :return: The column name in the card data
+    """
+    labels = constants.GOALIE_ATTRIBUTE_LABELS if player_row['Position'] == 'G' else constants.SKATER_ATTRIBUTE_LABELS
+    result = f'{labels[attribute_key]} {suffix}'
+    return result
+
+
+def get_rank_and_percentile(player_row: pd.Series, attribute_key: str) -> dict:
     """
     Return the player's rank and percentile of a given attribute. The percentile is read directly
-    from the '{attr}_pct' column ranking.py already computed, not recalculated here. If a player
+    from the card data's '{attribute} Percentile' column, not recalculated here. If a player
     does not qualify for an attribute ranking they receive a rank of 'N/A' and a percentile of 100
     (full percentile bar).
 
     :param player_row: A series from a data frame containing player ranks/percentiles
     :param attribute_key: A str of the attribute key of the rank an percentile to return
-    :return: A tuple of the player's rank (int or 'N/A') and percentile (int) for the given attribute
+    :return: A dict with the player's 'rank' (int or 'N/A') and 'percentile' (int) for the given attribute
     """
     # For player's that do not qualify for certain attributes (power play, penalty kill, or quality of competition/teammates)
-    if attribute_key in ["ppl", "pkl", "cmp", "tmt"] and pd.isna(player_row[f'{attribute_key}_rank']):
+    rank_column = get_attribute_column(player_row, attribute_key, 'Rank')
+    if attribute_key in ["ppl", "pkl", "cmp", "tmt"] and pd.isna(player_row[rank_column]):
         rank = 'N/A'
         percentile = 100
     # For attributes that all players qualify for
     else:
-        rank = int(player_row[f'{attribute_key}_rank'])
-        percentile = int(round(player_row[f'{attribute_key}_pct']))
+        rank = int(player_row[rank_column])
+        percentile = int(player_row[get_attribute_column(player_row, attribute_key, 'Percentile')])
 
-    return rank, percentile
+    result = {'rank': rank, 'percentile': percentile}
+    return result
 
 
 def get_percentile_color(percentile: int) -> tuple[int, int, int]:
@@ -175,7 +195,7 @@ def get_percentile_color(percentile: int) -> tuple[int, int, int]:
     100% -> Dark Green (0, 128, 0)
 
     :param percentile: An int of the percentile to return the color for
-    :return: A tuple containing normalized RGB values that correspond to the given percentile
+    :return: The (R, G, B) color that corresponds to the given percentile
     """
     if percentile <= 25:
         # Get color between red (255,0,0) and orange (255,165,0)
@@ -202,7 +222,8 @@ def get_percentile_color(percentile: int) -> tuple[int, int, int]:
         g = 238 - int((238 - 128) * ratio)
         b = 144 - int(144 * ratio)
 
-    return (r, g, b)
+    color = (r, g, b)
+    return color
 
 
 def get_player_single_season(player_name: str, season: str, position: str) -> pd.DataFrame:

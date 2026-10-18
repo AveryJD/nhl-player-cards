@@ -1,1 +1,1 @@
-from player_card_project.generate_cards.card_generation import make_player_card
+from player_card_project.card_generation import make_player_card

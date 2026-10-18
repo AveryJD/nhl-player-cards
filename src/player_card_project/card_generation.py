@@ -3,6 +3,7 @@
 # ====================================================================================================
 
 # Imports
+import os
 import pandas as pd
 import matplotlib
 matplotlib.use("Agg")
@@ -11,7 +12,7 @@ import io
 import ast
 import cairosvg
 from PIL import Image, ImageDraw, ImageFont
-from player_card_project.generate_cards import card_utils as ch
+from player_card_project import card_utils as ch
 from player_card_project import constants
 from player_card_project import data_io
 
@@ -84,18 +85,23 @@ def make_header_section(player_row: pd.Series, mode: str = 'light') -> Image:
     games_played = int(player_row['GP'])
     games_played_str = str(games_played)
     if position != 'G':
-        toi = float(player_row['TOI'])
-        toi_per_gp = toi / games_played
+        # TOI Per Game now comes pre-computed from the card data itself (stats-collection's
+        # player_card_data.py) -- still converted to MM:SS here, just no longer dividing TOI / GP ourselves
+        toi_per_gp = float(player_row['TOI Per Game'])
         toi_minutes = int(toi_per_gp)
         toi_seconds = int((toi_per_gp - toi_minutes) * 60)
         toi_formatted = f"{toi_minutes}:{toi_seconds:02d}"
-        stat_line = f"{int(player_row['Goals'])}-{int(player_row['Total Assists'])}-{int(player_row['Goals'] + player_row['Total Assists'])}"
-        xgoals = str(player_row['ixG'])
-        xgoals_for_percent = format((player_row['xGF%'] / 100), '.3f')
+        # Total Points already comes precomputed from the card data itself, rather than adding Goals +
+        # Total Assists here
+        stat_line = f"{int(player_row['Goals'])}-{int(player_row['Total Assists'])}-{int(player_row['Total Points'])}"
+        xgoals = f"{float(player_row['ixG']):.2f}"
+        xgoals_for_percent = f"{float(player_row['xGF%']) / 100:.3f}"
     else:
         record = f"{player_row['W']}-{player_row['L']}-{player_row['OT/SO']}"
-        save_percentage = str(float(player_row['SV%']))
-        gsax = format(player_row['xG Against'] - player_row['Goals Against'], '.2f')
+        save_percentage = f"{float(player_row['SV%']):.3f}"
+        # GSAx now comes pre-computed from the card data itself (stats-collection's player_card_data.py)
+        # instead of being computed here from 'xG Against'/'Goals Against'
+        gsax = f"{float(player_row['GSAx']):.2f}"
 
     # Create header section card
     header_section_width = 2000
@@ -112,7 +118,7 @@ def make_header_section(player_row: pd.Series, mode: str = 'light') -> Image:
     # x center for team logo and player headshot
     left_center_x = 362
 
-    with open(f'{DATA_DIR}/assets/team_logos/{team}_{mode}.svg', 'rb') as f:
+    with open(os.path.join(constants.ASSETS_DIR, 'team_logos', f'{team}_{mode}.svg'), 'rb') as f:
         svg_bytes = f.read()
     team_logo = Image.open(io.BytesIO(cairosvg.svg2png(bytestring=svg_bytes))).convert("RGBA")
     logo_width = 808
@@ -185,26 +191,27 @@ def make_rank_component(player_row: pd.Series, attribute_key: str, mode: str = '
     percentile, and a visual percentile bar.
 
     :param player_row: A Series containing player data
-    :param attribute_key: A str representing the attribute key that is being ranked (e.g. 'ovr')
+    :param attribute_key: A str representing the attribute key that is being ranked (e.g. 'tot')
     :param mode: A str determining the style of card ('light' or 'dark')
     :return: An Image of the rank component
     """
 
-    # Get attribute name
-    attribute_name = constants.ATTRIBUTE_NAMES.get(attribute_key)
+    # Get attribute name (goalies and skaters label some keys differently, e.g. 'pkl')
+    labels = constants.GOALIE_ATTRIBUTE_LABELS if player_row['Position'] == 'G' else constants.SKATER_ATTRIBUTE_LABELS
+    attribute_name = labels.get(attribute_key)
 
     # Get color variables
     if mode == 'light':
         background_color = constants.WHITE
         text_color = constants.DARK
-        if attribute_key in ['ovr', 'evo', 'evd', 'evs'] or (player_row['Position'] == 'G' and attribute_key == 'pkl'):
+        if attribute_key in ['tot', 'evo', 'evd', 'evs'] or (player_row['Position'] == 'G' and attribute_key == 'pkl'):
             attribute_color = constants.ATTRIBUTE_COLORS[attribute_name]
         else:
             attribute_color = constants.DARK
     else:
         background_color = constants.DARK
         text_color = constants.WHITE
-        if attribute_key in ['ovr', 'evo', 'evd', 'evs'] or (player_row['Position'] == 'G' and attribute_key == 'pkl'):
+        if attribute_key in ['tot', 'evo', 'evd', 'evs'] or (player_row['Position'] == 'G' and attribute_key == 'pkl'):
             attribute_color = constants.ATTRIBUTE_COLORS[attribute_name]
         else:
             attribute_color = constants.WHITE
@@ -226,10 +233,11 @@ def make_rank_component(player_row: pd.Series, attribute_key: str, mode: str = '
         total_players_key = 'all'
 
     # Get total players
-    total_players = int(player_row[f'{total_players_key}_players'])
+    total_players = int(player_row[constants.TOTAL_PLAYERS_COLUMNS[total_players_key]])
 
     # Get rank and percentile
-    rank, percentile = ch.get_rank_and_percentile(player_row, attribute_key)
+    rank_and_percentile = ch.get_rank_and_percentile(player_row, attribute_key)
+    rank, percentile = rank_and_percentile['rank'], rank_and_percentile['percentile']
         
     # Get percentile color
     if rank == 'N/A':
@@ -267,7 +275,7 @@ def make_rank_component(player_row: pd.Series, attribute_key: str, mode: str = '
     if rank != 'N/A':
         ch.draw_centered_text(draw, str(percentile), percentile_font, y_position=155, x_center=253, fill=text_color, stroke_width=3, stroke_fill=background_color)
 
-    if attribute_key in ['ovr', 'evo', 'evd', 'evs'] or (player_row['Position'] == 'G' and attribute_key == 'pkl'):
+    if attribute_key in ['tot', 'evo', 'evd', 'evs'] or (player_row['Position'] == 'G' and attribute_key == 'pkl'):
         draw.rectangle([(15, 64), (284, 70)], fill=attribute_color)
         r = 9
         draw.ellipse([(18 - r, 67 - r), (18 + r, 67 + r)], fill=attribute_color)
@@ -309,9 +317,9 @@ def make_graph_section(player_row: pd.DataFrame, position: str, mode: str = 'lig
 
     # Define attributes top plot depending on the position
     if position != 'G':
-        attributes_to_plot = ['ovr', 'evd', 'evo']
+        attributes_to_plot = ['tot', 'evd', 'evo']
     else:
-        attributes_to_plot = ['ovr', 'evs', 'pkl']
+        attributes_to_plot = ['tot', 'evs', 'pkl']
 
     x_vals = list(range(len(attributes_to_plot)))
 
@@ -330,7 +338,7 @@ def make_graph_section(player_row: pd.DataFrame, position: str, mode: str = 'lig
 
     # Iterate over attributes to plot
     for attribute_abbrev in attributes_to_plot:
-        history_col = f"{attribute_abbrev}_history"
+        history_col = ch.get_attribute_column(player_row, attribute_abbrev, 'History')
 
         history = player_row[history_col]
 
@@ -346,7 +354,7 @@ def make_graph_section(player_row: pd.DataFrame, position: str, mode: str = 'lig
         x_plot, y_plot = zip(*valid_data)
 
         # Plot overall line attribute
-        if attribute_abbrev == 'ovr':
+        if attribute_abbrev == 'tot':
             ax.plot(
                 x_plot, y_plot,
                 linewidth=5,
@@ -409,7 +417,7 @@ def make_graph_section(player_row: pd.DataFrame, position: str, mode: str = 'lig
         if team is None:
             logo_x += 220
             continue
-        with open(f'{DATA_DIR}/assets/team_logos/{team}_{mode}.svg', 'rb') as f:
+        with open(os.path.join(constants.ASSETS_DIR, 'team_logos', f'{team}_{mode}.svg'), 'rb') as f:
             svg_bytes = f.read()
         team_logo = Image.open(io.BytesIO(cairosvg.svg2png(bytestring=svg_bytes))).convert("RGBA")
 
@@ -532,7 +540,7 @@ def make_player_card(player_name: str, season: str, position: str, mode: str='li
     # For skater cards
     if position != 'G':
         # Add overall ranking
-        tot_rank_section = make_rank_component(player_cur_season, 'ovr', mode)
+        tot_rank_section = make_rank_component(player_cur_season, 'tot', mode)
         tot_rank_section = tot_rank_section.resize((512, 410), Image.Resampling.LANCZOS)
         player_card.paste(tot_rank_section, (742, 195))
 
@@ -591,7 +599,7 @@ def make_player_card(player_name: str, season: str, position: str, mode: str='li
     # For goalie cards
     else:
         # Add overall ranking
-        tot_rank_section = make_rank_component(player_cur_season, 'ovr', mode)
+        tot_rank_section = make_rank_component(player_cur_season, 'tot', mode)
         tot_rank_section = tot_rank_section.resize((512, 410), Image.Resampling.LANCZOS)
         player_card.paste(tot_rank_section, (742, 195))
 
@@ -657,4 +665,3 @@ def make_player_card(player_name: str, season: str, position: str, mode: str='li
     print(f'========== {team} {position} {player_name} ({mode}) card created for the {season} season! ==========')
 
     return player_card
-
