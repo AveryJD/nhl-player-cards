@@ -3,7 +3,7 @@ requires = ["setuptools>=65.5.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "nhl-player-stat-cards"
+name = "nhl-player-cards"
 version = "0.1.0"
 description = "NHL Player Stat Card generation project"
 authors = [{ name = "Avery Doiron" }]

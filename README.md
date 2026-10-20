@@ -1,7 +1,7 @@
 # NHL Player Stat Cards
 
 ## Description
-Generates visually appealing stat cards for individual NHL players from prepared card data. The data collection, modeling, and ranking live in the separate [project-nhl-stats-collection](https://github.com/AveryJD/project-nhl-stats-collection) project, which writes the card-ready CSV files this project reads.
+Generates visually appealing stat cards for individual NHL players from prepared card data. The data collection, modeling, and ranking live in the separate [nhl-stats-collection-and-processing](https://github.com/AveryJD/nhl-stats-collection-and-processing) project, which writes the card-ready CSV files this project reads.
 
 <p align="center">
   <img src="example_card.png" alt="Sidney Crosby Player Card" width="50%" />
@@ -19,8 +19,8 @@ Generates visually appealing stat cards for individual NHL players from prepared
 1. **Clone the repository:**
 
 ```bash
-git clone https://github.com/AveryJD/project-nhl-player-cards.git
-cd project-nhl-player-cards
+git clone https://github.com/AveryJD/nhl-player-cards.git
+cd nhl-player-cards
 ```
 
 2. **Create a data folder in the project root:**
