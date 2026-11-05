@@ -142,7 +142,7 @@ GOALIE_RATE_GAMES = 60
 
 # Name shown on the card for each goalie stat and how its value is displayed
 GOALIE_STAT_DISPLAY = {
-    'tot': ('Overall (All Situations)', 'war60'), 'evs': ('Even Strength', 'war60'), 'pkl': ('Penalty Kill', 'war60'), 'gpp': ('Power Play', 'war60'),
+    'tot': ('Overall (All Situations)', 'signed60'), 'evs': ('Even Strength', 'signed60'), 'pkl': ('Penalty Kill', 'signed60'), 'gpp': ('Power Play', 'signed60'),
     'gsv': ('Save %', 'save'), 'gag': ('Goals Against', 'negcount60'), 'gsx': ('GSAx', 'signed60'), 'ldg': ('LD GSAx', 'signed60'), 'mdg': ('MD GSAx', 'signed60'), 'hdg': ('HD GSAx', 'signed60'),
     'gre': ('Excellent Start %', 'rate'), 'qal': ('Quality Start %', 'rate'), 'bad': ('Bad Start %', 'rate'), 'awf': ('Awful Start %', 'rate'),
     'wrk': ('Game Start %', 'rate'), 'tmd': ('xGoals Against', 'negcount60'),
@@ -173,29 +173,15 @@ HANDEDNESS_NAMES = {
     'L': 'Left', 'R': 'Right',
 }
 
-# Symbols to be replaced in player names for the header
+# Symbols replaced in player names for the header (accents the heading font cannot draw; the others are drawn by draw_heading_text)
 SYMBOLS_TO_REPLACE = {
-    'ä': 'a',
-    'á': 'a',
-    'à': 'a',
     'â': 'a',
-    'é': 'e',
-    'è': 'e',
     'ê': 'e',
-    'ë': 'e',
-    'ï': 'i',
-    'í': 'i',
-    'ì': 'i',
     'î': 'i',
-    'ö': 'o',
-    'ó': 'o',
-    'ò': 'o',
     'ô': 'o',
     'ø': 'o',
-    'ü': 'u',
     'ñ': 'n',
     'ç': 'c',
-    'ý': 'y',
 }
 
 # === FONTS ===
@@ -206,7 +192,6 @@ HEADING_FONT_PATH = os.path.join(ASSETS_DIR, 'fonts', 'header.ttf')
 # Card color RGB values
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-GRAY = (180, 180, 180)
 DARK = (39, 39, 39)
 SECTION_LIGHT = (236, 236, 236)
 SECTION_DARK = (54, 54, 54)

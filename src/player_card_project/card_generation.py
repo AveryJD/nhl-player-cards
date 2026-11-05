@@ -111,7 +111,7 @@ def make_header_section(player_row: pd.Series, mode: str = 'light') -> Image:
     if player_row['Position'] == 'G':
         stats_rows = [
             ('Games Played:', games_played_str), ('W-L-OTL:', f"{int(player_row['Wins'])}-{int(player_row['Losses'])}-{int(player_row['OT Losses'])}"),
-            ('Save %:', f"{float(player_row['Season Save %']):.1%}"), ('GSAx:', f"{float(player_row['Season GSAx']):+.2f}"), ('WAR:', f"{float(player_row['Season WAR']):+.2f}"),
+            ('Save %:', f"{float(player_row['Season Save %']):.1%}"), ('GSAx:', ch.format_signed(float(player_row['Season GSAx']))), ('WAR:', ch.format_signed(float(player_row['Season WAR']))),
         ]
     else:
         # The player's all situations TOI per game that season (MM:SS)
@@ -121,7 +121,7 @@ def make_header_section(player_row: pd.Series, mode: str = 'light') -> Image:
         stats_rows = [
             ('Games Played:', games_played_str), ('TOI Per Game:', f'{toi_minutes}:{toi_seconds:02d}'),
             ('G-A-P:', f"{int(player_row['Season Goals'])}-{int(player_row['Season Assists'])}-{int(player_row['Season Points'])}"),
-            ('xG:', f"{float(player_row['Season xGoals']):.2f}"), ('WAR:', f"{float(player_row['Season WAR']):+.2f}"),
+            ('xG:', f"{float(player_row['Season xGoals']):.2f}"), ('WAR:', ch.format_signed(float(player_row['Season WAR']))),
         ]
 
     # Create header section
@@ -168,10 +168,10 @@ def make_header_section(player_row: pd.Series, mode: str = 'light') -> Image:
     # Draw banner
     draw.rectangle([(0, 0), (header_section_width, 110)], fill=primary_team_color)
     # Draw name and season drop shadow
-    draw.text(xy=(36, 10), text=header_name, font=heading_font, fill=header_shadow_color)
+    ch.draw_heading_text(draw, (36, 10), header_name, heading_font, header_shadow_color)
     ch.draw_righted_text(draw, season, heading_font, 10, header_section_width - 44, fill=header_shadow_color)
     # Draw name and season text
-    draw.text(xy=(40, 6), text=header_name, font=heading_font, fill=header_text_color)
+    ch.draw_heading_text(draw, (40, 6), header_name, heading_font, header_text_color)
     ch.draw_righted_text(draw, season, heading_font, 6, header_section_width - 40, fill=header_text_color)
 
     # Row y positions
@@ -204,9 +204,8 @@ def make_header_section(player_row: pd.Series, mode: str = 'light') -> Image:
 
 # The fonts and sizes of a stat component's text, bar, and dot for each size of component
 STAT_COMPONENT_SIZES = {
-    'small': {'name_font': 'stat', 'value_font': 'stat', 'percentile_font': 'basic_42', 'percentile_font_100': 'basic_42', 'bar_height': 24, 'dot_radius': 32},
-    'medium': {'name_font': 'stat', 'value_font': 'stat', 'percentile_font': 'basic_42', 'percentile_font_100': 'basic_42', 'bar_height': 24, 'dot_radius': 32},
-    'large': {'name_font': 'stat', 'value_font': 'stat', 'percentile_font': 'basic_50', 'percentile_font_100': 'basic_50', 'bar_height': 32, 'dot_radius': 39},
+    'small': {'name_font': 'stat', 'value_font': 'stat', 'percentile_font': 'basic_42', 'bar_height': 24, 'dot_radius': 32},
+    'large': {'name_font': 'stat', 'value_font': 'stat', 'percentile_font': 'basic_50', 'bar_height': 32, 'dot_radius': 39},
 }
 
 
@@ -224,7 +223,7 @@ def get_bar_bottom(size: str) -> int:
     """
     Return how far down a stat component its gradient bar ends (the bar sits just below the stat name's capital letters).
 
-    :param size: A str of the size of the component ('small', 'medium', or 'large')
+    :param size: A str of the size of the component ('small' or 'large')
     :return: An int of the y position of the bottom of the bar within the component
     """
     sizes = STAT_COMPONENT_SIZES[size]
@@ -243,7 +242,7 @@ def make_stat_component(player_row: pd.Series, attribute_key: str, width: int, h
     :param width: An int of the component's width in pixels
     :param height: An int of the component's height in pixels
     :param mode: A str determining the style of card ('light' or 'dark')
-    :param size: A str of the size of the component's text and bar ('small', 'medium', or 'large')
+    :param size: A str of the size of the component's text and bar ('small' or 'large')
     :return: An Image of the stat component
     """
 
@@ -263,7 +262,7 @@ def make_stat_component(player_row: pd.Series, attribute_key: str, width: int, h
     value_font = FONT_CACHE[sizes['value_font']]
     # A three digit percentile (100) uses a smaller font so it fits inside the dot
     percentile_str = str(stat['percentile'])
-    percentile_font = FONT_CACHE[sizes['percentile_font_100' if len(percentile_str) == 3 else 'percentile_font']]
+    percentile_font = FONT_CACHE[sizes['percentile_font']]
     bar_height = sizes['bar_height']
     dot_radius = sizes['dot_radius']
 
@@ -301,8 +300,8 @@ def make_stat_component(player_row: pd.Series, attribute_key: str, width: int, h
         # The percentile is drawn at the larger size too, so its stroke can be a fraction of a pixel
         percentile_font_large = ImageFont.truetype(BASIC_FONT_PATH, percentile_font.size * scale)
         dot_draw.text(
-            (dot_x * scale, bar_center_y * scale), percentile_str, font=percentile_font_large, fill=text_color + (255,), anchor='mm',
-            stroke_width=round(STAT_PERCENTILE_STROKE * scale), stroke_fill=text_color + (255,),
+            (dot_x * scale, bar_center_y * scale), percentile_str, font=percentile_font_large, fill=constants.WHITE + (255,), anchor='mm',
+            stroke_width=round(STAT_PERCENTILE_STROKE * scale), stroke_fill=constants.WHITE + (255,),
         )
     # Scale back down (BOX avoids the halo LANCZOS leaves)
     shapes = shapes.resize((width, height), Image.Resampling.BOX)
@@ -462,7 +461,7 @@ def make_stat_group_section(player_row: pd.Series, title: str, attribute_keys: l
     for component_num, attribute_key in enumerate(attribute_keys):
         if attribute_key is None:
             continue
-        component = make_stat_component(player_row, attribute_key, width - 80, component_height, mode, size='medium')
+        component = make_stat_component(player_row, attribute_key, width - 80, component_height, mode, size='small')
         group_section.paste(component, (40, top_padding + round(component_num * component_pitch)))
 
     return group_section
@@ -543,7 +542,7 @@ def make_branding_section(player_row: pd.Series, mode: str = 'light') -> Image:
     group_name = constants.POSITION_GROUP_NAMES[player_row['Position']]
     per_rate = f'{constants.GOALIE_RATE_GAMES} game' if player_row['Position'] == 'G' else f'{season_games} game'
     data_notes = (
-        f'Data is weighted over the past 3 seasons. Data is 5v5 and adjusted to a per {per_rate} rate unless otherwise stated. '
+        f'Data is 5v5 (unless stated otherwise), weighted over the past 3 seasons, and adjusted to a per {per_rate} rate. '
         f'Percentiles compare {group_name} with at least {min_minutes} minutes. '
         f'All data and images from the NHL. Updated {update_date}.'
     )

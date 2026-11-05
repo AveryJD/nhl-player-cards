@@ -11,6 +11,7 @@ import os
 import cairosvg
 import requests
 import numpy as np
+import unicodedata
 from datetime import datetime
 from player_card_project import constants
 from player_card_project import data_io
@@ -46,6 +47,90 @@ def draw_centered_text(
     text_width = text_bbox[2] - text_bbox[0]
     x_position = x_center - (text_width // 2)
     draw.text((x_position, y_position), text, font=font, fill=fill, stroke_width=stroke_width, stroke_fill=stroke_fill)
+
+
+# Accent marks the heading font has no glyphs for, drawn as shapes (combining character: kind of mark)
+HEADING_MARKS = {'\u0300': 'grave', '\u0301': 'acute', '\u0308': 'diaeresis', '\u030a': 'ring'}
+APOSTROPHES = ("'", '\u2019')
+
+
+def draw_heading_mark(draw: ImageDraw.ImageDraw, kind: str, center: float, cap_top: float, stroke: int, fill: tuple[int, int, int]) -> None:
+    """
+    Draws an accent mark above a letter of the heading font as blocky shapes sized to the font's stroke.
+
+    :param draw: A PIL drawing to draw the mark on
+    :param kind: A str of the mark ('grave', 'acute', 'diaeresis', or 'ring')
+    :param center: A float of the x position the mark is centered on
+    :param cap_top: A float of the y position of the top of the capital letters
+    :param stroke: An int of the thickness of the font's strokes
+    :param fill: A tuple of rgb values for the color of the mark
+    :return: None
+    """
+    bottom = cap_top - round(stroke * 0.3)
+    top = bottom - round(stroke * 0.95)
+    if kind in ('acute', 'grave'):
+        half, thick = round(stroke * 0.8), round(stroke * 1.1)
+        if kind == 'acute':
+            points = [(center - half, bottom), (center - half + thick, bottom), (center + half, top), (center + half - thick, top)]
+        else:
+            points = [(center + half, bottom), (center + half - thick, bottom), (center - half, top), (center - half + thick, top)]
+        draw.polygon(points, fill=fill)
+    elif kind == 'diaeresis':
+        size, space = round(stroke * 0.9), round(stroke * 0.55)
+        for left in (center - space / 2 - size, center + space / 2):
+            draw.rectangle([left, top, left + size - 1, bottom - 1], fill=fill)
+    else:
+        # A square ring made from four bars
+        half_width, ring_top, bar = round(stroke * 0.8), top - round(stroke * 0.2), round(stroke * 0.4)
+        draw.rectangle([center - half_width, ring_top, center + half_width, ring_top + bar - 1], fill=fill)
+        draw.rectangle([center - half_width, bottom - bar, center + half_width, bottom - 1], fill=fill)
+        draw.rectangle([center - half_width, ring_top, center - half_width + bar - 1, bottom - 1], fill=fill)
+        draw.rectangle([center + half_width - bar + 1, ring_top, center + half_width, bottom - 1], fill=fill)
+
+
+def draw_heading_text(draw: ImageDraw.ImageDraw, xy: tuple[int, int], text: str, font: ImageFont.ImageFont, fill: tuple[int, int, int]) -> None:
+    """
+    Draws text in the heading font, which has no apostrophe or accent glyphs. Those are drawn as shapes in the same blocky style.
+
+    :param draw: A PIL drawing to draw the text on
+    :param xy: A tuple of the x and y position of the text's top left corner
+    :param text: A str of the text to draw
+    :param font: An ImageFont of the heading font
+    :param fill: A tuple of rgb values for the color of the text
+    :return: None
+    """
+    x, y = xy
+    cap_top = y + font.getbbox('H')[1]
+    cap_height = font.getmask('H').getbbox()[3]
+    stroke = font.getmask('-').getbbox()[3]
+
+    # Split the text into letters with their marks, and apostrophes
+    units = []
+    for char in unicodedata.normalize('NFD', text):
+        if char in HEADING_MARKS and units and units[-1][0] not in APOSTROPHES:
+            units[-1][1].append(HEADING_MARKS[char])
+        else:
+            units.append((char, []))
+
+    # Draw runs of plain letters together to keep their spacing, and the apostrophes and marks as shapes
+    run = ''
+    for char, marks in units:
+        if char in APOSTROPHES or marks:
+            draw.text((x, y), run, font=font, fill=fill)
+            x += font.getlength(run)
+            run = ''
+            if char in APOSTROPHES:
+                draw.rectangle([x + 3, cap_top, x + 3 + stroke - 1, cap_top + round(cap_height * 0.42)], fill=fill)
+                x += stroke + 6
+            else:
+                draw.text((x, y), char, font=font, fill=fill)
+                ink_left, _, ink_right, _ = font.getmask(char).getbbox()
+                for kind in marks:
+                    draw_heading_mark(draw, kind, x + (ink_left + ink_right) / 2, cap_top, stroke, fill)
+                x += font.getlength(char)
+        else:
+            run += char
+    draw.text((x, y), run, font=font, fill=fill)
 
 
 def draw_righted_text(
@@ -200,25 +285,34 @@ def get_season_games(season: str) -> int:
     return season_games
 
 
+def format_signed(value: float) -> str:
+    """
+    Format a number to two decimals with a + or - sign (zero gets no sign, so -0.00 and +0.00 both become 0.00).
+
+    :param value: A float to format
+    :return: A str of the formatted value
+    """
+    text = f'{value:+.2f}'
+    return '0.00' if float(text) == 0 else text
+
+
 def format_stat_value(value: float, kind: str, season: str) -> str:
     """
     Format a stat's per-game value for display on the card (skater rates are scaled to the season length and goalie rates to GOALIE_RATE_GAMES games).
 
     :param value: A float of the stat's per-game value
-    :param kind: A str of how the stat is displayed ('war', 'count', 'percent', 'toi', 'rate', 'save', 'war60', 'signed60', or 'negcount60')
+    :param kind: A str of how the stat is displayed ('war', 'count', 'percent', 'toi', 'rate', 'save', 'signed60', or 'negcount60')
     :param season: A str representing the season ('YYYY-YYYY')
     :return: A str of the formatted value
     """
     season_games = get_season_games(season)
 
     if kind == 'war':
-        formatted = f'{value * season_games:+.2f}'
+        formatted = format_signed(value * season_games)
     elif kind == 'save':
         formatted = f'{value * 100:.1f}%'
-    elif kind == 'war60':
-        formatted = f'{value * constants.GOALIE_RATE_GAMES:+.2f}'
     elif kind == 'signed60':
-        formatted = f'{value * constants.GOALIE_RATE_GAMES:+.2f}'
+        formatted = format_signed(value * constants.GOALIE_RATE_GAMES)
     elif kind == 'negcount60':
         formatted = f'{-value * constants.GOALIE_RATE_GAMES:.1f}'
     elif kind == 'count':
