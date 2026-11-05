@@ -111,7 +111,7 @@ def make_header_section(player_row: pd.Series, mode: str = 'light') -> Image:
     if player_row['Position'] == 'G':
         stats_rows = [
             ('Games Played:', games_played_str), ('W-L-OTL:', f"{int(player_row['Wins'])}-{int(player_row['Losses'])}-{int(player_row['OT Losses'])}"),
-            ('Save %:', f"{float(player_row['Season Save %']):.3f}"), ('GSAx:', f"{float(player_row['Season GSAx']):+.2f}"), ('WAR:', f"{float(player_row['Season WAR']):+.2f}"),
+            ('Save %:', f"{float(player_row['Season Save %']):.1%}"), ('GSAx:', f"{float(player_row['Season GSAx']):+.2f}"), ('WAR:', f"{float(player_row['Season WAR']):+.2f}"),
         ]
     else:
         # The player's all situations TOI per game that season (MM:SS)
@@ -204,7 +204,7 @@ def make_header_section(player_row: pd.Series, mode: str = 'light') -> Image:
 
 # The fonts and sizes of a stat component's text, bar, and dot for each size of component
 STAT_COMPONENT_SIZES = {
-    'small': {'name_font': 'stat', 'value_font': 'stat', 'percentile_font': 'basic_36', 'percentile_font_100': 'basic_36', 'bar_height': 22, 'dot_radius': 27},
+    'small': {'name_font': 'stat', 'value_font': 'stat', 'percentile_font': 'basic_42', 'percentile_font_100': 'basic_42', 'bar_height': 24, 'dot_radius': 32},
     'medium': {'name_font': 'stat', 'value_font': 'stat', 'percentile_font': 'basic_42', 'percentile_font_100': 'basic_42', 'bar_height': 24, 'dot_radius': 32},
     'large': {'name_font': 'stat', 'value_font': 'stat', 'percentile_font': 'basic_50', 'percentile_font_100': 'basic_50', 'bar_height': 32, 'dot_radius': 39},
 }

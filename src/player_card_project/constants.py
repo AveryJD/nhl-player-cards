@@ -61,7 +61,7 @@ SKATER_STAT_DISPLAY = {
     'xgl': ('xGoals', 'count'), 'gol': ('Goals', 'count'), 'ast': ('Primary Assists', 'count'), 'hit': ('Hits', 'count'),
     'sho': ('Shots', 'count'), 'cfs': ('Corsi Share', 'percent'), 'xfs': ('xGoal Share', 'percent'), 'gfs': ('Goal Share', 'percent'),
     'shp': ('Shooting %', 'percent'), 'svp': ('Save %', 'percent'),
-    'toi': ('5v5 Ice Time (Per Game)', 'toi'), 'ppt': ('5v4 Ice Time (Per Game)', 'toi'), 'pkt': ('4v5 Ice Time (Per Game)', 'toi'), 'tmt': ('Teammates', 'war'),
+    'toi': ('5v5 Ice Time', 'toi'), 'ppt': ('5v4 Ice Time', 'toi'), 'pkt': ('4v5 Ice Time', 'toi'), 'tmt': ('Teammates', 'war'),
     'cmp': ('Opponents', 'war'),
 }
 # Special teams WAR shown (without a ranking) for players that do not qualify
@@ -122,14 +122,14 @@ SKATER_STAT_SECTIONS = [
 GOALIE_STAT_SECTIONS = [
     ('Goals Saved', ['gsv', 'gsx', 'ldg', 'mdg', 'hdg']),
     ('Shots Against', ['gag', 'tmd', 'lds', 'mds', 'hds']),
-    ('Starts (Per Season)', ['wrk', 'gre', 'qal', 'bad', 'awf']),
+    ('Starts', ['wrk', 'gre', 'qal', 'bad', 'awf']),
 ]
 # The title of the WAR section
 WAR_SECTION_TITLE = 'Wins Above Replacement'
 
 # Font sizes shared by every card (the largest that fit the longest text)
-STAT_FONT_SIZE = 54
-TITLE_FONT_SIZE = 69
+STAT_FONT_SIZE = 60
+TITLE_FONT_SIZE = 75
 BRANDING_FONT_SIZE = 38
 
 # Games in a season that per-game rates are scaled to (2026-2027 onward has 84)

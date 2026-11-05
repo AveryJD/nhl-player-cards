@@ -214,7 +214,7 @@ def format_stat_value(value: float, kind: str, season: str) -> str:
     if kind == 'war':
         formatted = f'{value * season_games:+.2f}'
     elif kind == 'save':
-        formatted = f'{value:.3f}'
+        formatted = f'{value * 100:.1f}%'
     elif kind == 'war60':
         formatted = f'{value * constants.GOALIE_RATE_GAMES:+.2f}'
     elif kind == 'signed60':
@@ -224,9 +224,9 @@ def format_stat_value(value: float, kind: str, season: str) -> str:
     elif kind == 'count':
         formatted = f'{value * season_games:.1f}'
     elif kind == 'percent':
-        formatted = f'{value / 100:.3f}'
+        formatted = f'{value:.1f}%'
     elif kind == 'rate':
-        formatted = f'{abs(value):.3f}'
+        formatted = f'{abs(value) * 100:.1f}%'
     else:
         minutes = int(value)
         seconds = int(round((value - minutes) * 60))
