@@ -49,27 +49,120 @@ ASSETS_DIR = os.path.join(DATA_DIR, 'card_data', 'assets')
 # ====================================================================================================
 
 # Date card data was updated on
-UPDATE_DATE = 'September 1, 2026'
+UPDATE_DATE = 'Sep 1, 2026'
 
 # Position to data folder name
 POSITION_FOLDERS = {'F': 'forwards', 'D': 'defensemen', 'G': 'goalies'}
 
-# The card data CSVs name each ranked attribute in plain words. These map the short attribute keys the card code uses to those labels.
-SKATER_ATTRIBUTE_LABELS = {
-    'tot': 'Total WAR', 'evo': 'ES Offense', 'evd': 'ES Defense', 'ppl': 'PP Offense', 'pkl': 'PK Defense',
-    'fin': 'Finishing', 'gol': 'Goals', 'xgl': 'xGoals', 'ast': 'Assists', 'pen': 'Penalties', 'hit': 'Physicality',
-    'ozs': 'O-Zone Starts', 'pdo': 'PDO (Luck)', 'tmt': 'Teammates', 'cmp': 'Competition',
+# Name shown on the card for each skater stat and how its value is displayed (the kinds are formatted in card_utils.format_stat_value)
+SKATER_STAT_DISPLAY = {
+    'tot': ('Overall (All Situations)', 'war'), 'evo': ('ES Offense', 'war'), 'evd': ('ES Defense', 'war'),
+    'ppl': ('Power Play', 'war'), 'pkl': ('Penalty Kill', 'war'), 'fin': ('Finishing (All)', 'war'), 'pen': ('Penalties (All)', 'war'),
+    'xgl': ('xGoals', 'count'), 'gol': ('Goals', 'count'), 'ast': ('Primary Assists', 'count'), 'hit': ('Hits', 'count'),
+    'sho': ('Shots', 'count'), 'cfs': ('Corsi Share', 'percent'), 'xfs': ('xGoal Share', 'percent'), 'gfs': ('Goal Share', 'percent'),
+    'shp': ('Shooting %', 'percent'), 'svp': ('Save %', 'percent'),
+    'toi': ('5v5 Ice Time (Per Game)', 'toi'), 'ppt': ('5v4 Ice Time (Per Game)', 'toi'), 'pkt': ('4v5 Ice Time (Per Game)', 'toi'), 'tmt': ('Teammates', 'war'),
+    'cmp': ('Opponents', 'war'),
 }
-GOALIE_ATTRIBUTE_LABELS = {
-    'tot': 'Total WAR', 'evs': 'Even Strength', 'pkl': 'Penalty Kill', 'ldg': 'Low Danger', 'mdg': 'Med. Danger',
-    'hdg': 'High Danger', 'rbd': 'Rebounds', 'tmd': 'Team Defense', 'gre': 'Great Starts', 'qal': 'Quality Starts',
-    'bad': 'Bad Starts', 'awf': 'Awful Starts', 'wrk': 'Workload',
+# Special teams WAR shown (without a ranking) for players that do not qualify
+SKATER_UNQUALIFIED_LABELS = {'ppl': 'Power Play (All)', 'pkl': 'Penalty Kill (All)'}
+# Special teams ice times that are only ranked for players who qualify for the matching WAR
+SKATER_QUALIFIED_BY = {'ppt': 'ppl', 'pkt': 'pkl'}
+
+# Minimum minutes of ice time to be ranked in a season (same as the pipeline's SKATER_MIN_TOI and GOALIE_MIN_TOI)
+SKATER_MIN_TOI = {
+    '2026-2027': 100,    # Current season (max games any team has played)
+    '2025-2026': 300,
+    '2024-2025': 300,
+    '2023-2024': 300,
+    '2022-2023': 300,
+    '2021-2022': 300,
+    '2020-2021': 200,    # Season shortened due to COVID
+    '2019-2020': 250,    # Season paused due to COVID
+    '2018-2019': 300,
+    '2017-2018': 300,
+    '2016-2017': 300,
+    '2015-2016': 300,
+    '2014-2015': 300,
+    '2013-2014': 300,
+    '2012-2013': 200,    # Season shortened due to lockout
+    '2011-2012': 300,
+    '2010-2011': 300,
+    '2009-2010': 300,
 }
 
-# Columns holding how many players were ranked (all players, or only those who qualified for power play / penalty kill)
-TOTAL_PLAYERS_COLUMNS = {'all': 'All Players', 'ppl': 'PP Offense Players', 'pkl': 'PK Defense Players'}
+GOALIE_MIN_TOI = {
+    '2026-2027': 300,    # Current season (max games any team has played)
+    '2025-2026': 600,
+    '2024-2025': 600,
+    '2023-2024': 600,
+    '2022-2023': 600,
+    '2021-2022': 600,
+    '2020-2021': 400,    # Season shortened due to COVID
+    '2019-2020': 500,    # Season paused due to COVID
+    '2018-2019': 600,
+    '2017-2018': 600,
+    '2016-2017': 600,
+    '2015-2016': 600,
+    '2014-2015': 600,
+    '2013-2014': 600,
+    '2012-2013': 400,    # Season shortened due to lockout
+    '2011-2012': 600,
+    '2010-2011': 600,
+    '2009-2010': 600,
+}
+
+# Player group names for the branding note, and the stat sections: (title, five attribute keys top to bottom, None leaves a slot blank)
+POSITION_GROUP_NAMES = {'F': 'forwards', 'D': 'defensemen', 'G': 'goalies'}
+SKATER_STAT_SECTIONS = [
+    ('Individual', ['xgl', 'gol', 'ast', 'sho', 'hit']),
+    ('On-Ice', ['xfs', 'gfs', 'cfs', 'shp', 'svp']),
+    ('Deployment', ['tmt', 'cmp', 'toi', 'ppt', 'pkt']),
+]
+GOALIE_STAT_SECTIONS = [
+    ('Goals Saved', ['gsv', 'gsx', 'ldg', 'mdg', 'hdg']),
+    ('Shots Against', ['gag', 'tmd', 'lds', 'mds', 'hds']),
+    ('Starts (Per Season)', ['wrk', 'gre', 'qal', 'bad', 'awf']),
+]
+# The title of the WAR section
+WAR_SECTION_TITLE = 'Wins Above Replacement'
+
+# Font sizes shared by every card (the largest that fit the longest text)
+STAT_FONT_SIZE = 54
+TITLE_FONT_SIZE = 69
+BRANDING_FONT_SIZE = 38
+
+# Games in a season that per-game rates are scaled to (2026-2027 onward has 84)
+SEASON_LENGTH = 82
+LONG_SEASON_LENGTH = 84
+LONG_SEASON_START_YEAR = 2026
+
+# Games that goalie rates are scaled to on the card (scores are stored per 60 minutes)
+GOALIE_RATE_GAMES = 60
+
+# Name shown on the card for each goalie stat and how its value is displayed
+GOALIE_STAT_DISPLAY = {
+    'tot': ('Overall (All Situations)', 'war60'), 'evs': ('Even Strength', 'war60'), 'pkl': ('Penalty Kill', 'war60'), 'gpp': ('Power Play', 'war60'),
+    'gsv': ('Save %', 'save'), 'gag': ('Goals Against', 'negcount60'), 'gsx': ('GSAx', 'signed60'), 'ldg': ('LD GSAx', 'signed60'), 'mdg': ('MD GSAx', 'signed60'), 'hdg': ('HD GSAx', 'signed60'),
+    'gre': ('Excellent Start %', 'rate'), 'qal': ('Quality Start %', 'rate'), 'bad': ('Bad Start %', 'rate'), 'awf': ('Awful Start %', 'rate'),
+    'wrk': ('Game Start %', 'rate'), 'tmd': ('xGoals Against', 'negcount60'),
+    'lds': ('LD Shots Against', 'negcount60'), 'mds': ('MD Shots Against', 'negcount60'), 'hds': ('HD Shots Against', 'negcount60'),
+}
+
+# Card data columns are named '{label} Score', '{label} Percentile', and '{label} History'
+SKATER_ATTRIBUTE_LABELS = {key: display[0] for key, display in SKATER_STAT_DISPLAY.items()}
+GOALIE_ATTRIBUTE_LABELS = {key: display[0] for key, display in GOALIE_STAT_DISPLAY.items()}
 
 # === NAMING ===
+# Birth country codes to full names (an unlisted code is shown as is)
+COUNTRY_NAMES = {
+    'AUS': 'Australia', 'AUT': 'Austria', 'BLR': 'Belarus', 'CAN': 'Canada', 'CHE': 'Switzerland', 'CZE': 'Czechia',
+    'DEU': 'Germany', 'DNK': 'Denmark', 'EST': 'Estonia', 'FIN': 'Finland', 'FRA': 'France', 'GBR': 'Great Britain',
+    'HUN': 'Hungary', 'ITA': 'Italy', 'JPN': 'Japan', 'KAZ': 'Kazakhstan', 'LTU': 'Lithuania', 'LVA': 'Latvia',
+    'NLD': 'Netherlands', 'NOR': 'Norway', 'POL': 'Poland', 'RUS': 'Russia', 'SVK': 'Slovakia', 'SVN': 'Slovenia',
+    'SWE': 'Sweden', 'UKR': 'Ukraine', 'USA': 'USA',
+}
+
 # Specific position full names
 POSITION_NAMES = {
     'C': 'Center', 'L': 'Left Wing', 'R': 'Right Wing', 'D': 'Defense', 'G': 'Goalie'
@@ -115,10 +208,8 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 GRAY = (180, 180, 180)
 DARK = (39, 39, 39)
-GRAPH_WHITE = (255/255, 255/255, 255/255)
-GRAPH_BLACK = (0/255, 0/255, 0/255)
-GRAPH_GRAY = (180/255, 180/255, 180/255)
-GRAPH_DARK = (39/255, 39/255, 39/255)
+SECTION_LIGHT = (236, 236, 236)
+SECTION_DARK = (54, 54, 54)
 
 # Team primary color RBG values
 PRIMARY_COLORS = {
@@ -152,20 +243,8 @@ SECONDARY_COLORS = {
     'ATL': (184, 97, 37),   'PHX': (21,71,52),
 }
 
-# Rank components RBG values
-ATTRIBUTE_COLORS = {
-    'Total WAR':        (210, 110, 210),
-    'ES Offense':       (255, 70, 70),
-    'ES Defense':       (70, 70, 255),
-    'Even Strength':    (255, 70, 70),
-    'Penalty Kill':     (70, 70, 255),
-}
+# Stat bar gradient (low to high), the same red, purple, and blue as the website
+STAT_GRADIENT_COLORS = [(255, 99, 99), (210, 110, 210), (99, 99, 255)]
+# Share of the bar at each end that stays solid red or blue
+STAT_GRADIENT_SOLID_FRACTION = 0.12
 
-# Graph component RBG values
-PLOT_ATTRIBUTE_COLORS = {
-    'tot_plot': (210/255, 110/255, 210/255),
-    'evo_plot': (255/255, 70/255, 70/255),
-    'evd_plot': (70/255, 70/255, 255/255),
-    'evs_plot': (255/255, 70/255, 70/255),
-    'pkl_plot': (70/255, 70/255, 255/255),
-}
