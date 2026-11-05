@@ -1,7 +1,7 @@
 # NHL Player Stat Cards
 
 ## Description
-Generates visually appealing stat cards for individual NHL players from prepared card data. The data collection, modeling, and ranking live in the separate [nhl-stats-collection-and-processing](https://github.com/AveryJD/nhl-stats-collection-and-processing) project, which writes the card-ready CSV files this project reads.
+Generates visually appealing stat cards for individual NHL players from prepared card data. The data collection, modeling, and ranking live in the separate [nhl-analytics-pipeline](https://github.com/AveryJD/nhl-analytics-pipeline) project (not currently public, but will be made available), which writes the card-ready CSV files this project reads.
 
 <p align="center">
   <img src="example_card.png" alt="Sidney Crosby Player Card" width="50%" />
@@ -29,7 +29,7 @@ cd nhl-player-cards
 mkdir data
 ```
 
-This folder will hold the card data (data/card_data/player_card_data/) and the card assets (data/card_data/assets/fonts and data/card_data/assets/team_logos), both produced by the stats collection project.
+This folder will hold the card data (data/card_data/player_card_data/) and the card assets (data/card_data/assets/fonts and data/card_data/assets/team_logos), both produced by the analytics pipeline project.
 
 3. **Create a virtual environment:**
 
@@ -52,7 +52,7 @@ pip install -r requirements.txt
 
 
 ## Usage
-Copy the card_data folder (contains player card data and assets, as well as team card data but that can be deleted) from the stats collection project's data folder into this project's data folder, then generate cards.
+Copy the card_data folder (contains player card data and assets, as well as team card data but that can be deleted) from the analytics pipeline's data folder into this project's data folder, then generate cards.
 
 Call functions in src/player_card_project/__main__.py to choose what cards to generate:
 ```python
@@ -63,7 +63,7 @@ Parameters:
   Player Full Name ('First Last')
   Season ('YYYY-YYYY')
   Position Code ('F', 'D', or 'G')
-  Card Mode ('Light' or 'Dark')
+  Card Mode ('light' or 'dark')
 """
 ```
 
