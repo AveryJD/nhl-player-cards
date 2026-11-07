@@ -46,18 +46,17 @@ def load_card_data_csv(season: str, position: str) -> pd.DataFrame:
     return card_data_df
 
 
-def save_card(card: Image, season: str, team: str, position: str, file_name: str) -> None:
+def save_card(card: Image, season: str, file_name: str, *subfolders: str) -> None:
     """
-    Save a card PNG to a specified folder.
+    Save a card PNG to the player_cards folder, inside the season's folder (and any further folders given inside it).
 
     :param card: The card image to save
     :param season: A str representing the season ('YYYY-YYYY')
-    :param team: The team folder inside the year folder to save to
-    :param position: A str representing the player's position ('F', 'D', or 'G')
     :param file_name: Name of the card to save
+    :param subfolders: Any folders inside the season folder to save to (the player's team and then position)
     :return: None
     """
-    save_dir = os.path.join(PROJECT_DIR, 'player_cards', season, team, position)
+    save_dir = os.path.join(PROJECT_DIR, 'player_cards', season, *subfolders)
     os.makedirs(save_dir, exist_ok=True)
 
     save_path = os.path.join(save_dir, file_name)
