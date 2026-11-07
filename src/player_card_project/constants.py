@@ -2,6 +2,7 @@
 # GET PROJECT FILE LOCATION
 # ====================================================================================================
 
+# Imports
 import os
 
 def find_project_dir(start_dir: str) -> str:
@@ -14,7 +15,7 @@ def find_project_dir(start_dir: str) -> str:
 
     project_dir = None
     while project_dir is None:
-        potential_data_dir = os.path.join(start_dir, "data")
+        potential_data_dir = os.path.join(start_dir, 'data')
 
         if os.path.exists(potential_data_dir):
             project_dir = start_dir
@@ -38,7 +39,7 @@ if DATA_DIR:
     PROJECT_DIR = os.path.dirname(DATA_DIR)
 else:
     PROJECT_DIR = find_project_dir(CURRENT_DIR)
-    DATA_DIR = os.path.join(PROJECT_DIR, "data")
+    DATA_DIR = os.path.join(PROJECT_DIR, 'data')
 
 # Card assets (fonts and team logos)
 ASSETS_DIR = os.path.join(DATA_DIR, 'card_data', 'assets')
@@ -49,8 +50,9 @@ ASSETS_DIR = os.path.join(DATA_DIR, 'card_data', 'assets')
 # ====================================================================================================
 
 # Date card data was updated on
-UPDATE_DATE = 'Sep 1, 2026'
+UPDATE_DATE = 'September 1, 2026'
 
+# === NAMING ===
 # Position to data folder name
 POSITION_FOLDERS = {'F': 'forwards', 'D': 'defensemen', 'G': 'goalies'}
 
@@ -59,86 +61,30 @@ SKATER_STAT_DISPLAY = {
     'tot': ('Overall (All Situations)', 'war'), 'evo': ('ES Offense', 'war'), 'evd': ('ES Defense', 'war'),
     'ppl': ('Power Play', 'war'), 'pkl': ('Penalty Kill', 'war'), 'fin': ('Finishing (All)', 'war'), 'pen': ('Penalties (All)', 'war'),
     'xgl': ('xGoals', 'count'), 'gol': ('Goals', 'count'), 'ast': ('Primary Assists', 'count'), 'hit': ('Hits', 'count'),
-    'sho': ('Shots', 'count'), 'cfs': ('Corsi Share', 'percent'), 'xfs': ('xGoal Share', 'percent'), 'gfs': ('Goal Share', 'percent'),
+    'sho': ('Shots', 'count'), 'sfs': ('Shot Share', 'percent'), 'xfs': ('xGoal Share', 'percent'), 'gfs': ('Goal Share', 'percent'),
     'shp': ('Shooting %', 'percent'), 'svp': ('Save %', 'percent'),
-    'toi': ('5v5 Ice Time', 'toi'), 'ppt': ('5v4 Ice Time', 'toi'), 'pkt': ('4v5 Ice Time', 'toi'), 'tmt': ('Teammates', 'war'),
-    'cmp': ('Opponents', 'war'),
+    'toi': ('5v5 Ice Time', 'toi'), 'ppt': ('5v4 Ice Time', 'toi'), 'pkt': ('4v5 Ice Time', 'toi'), 'tmt': ('5v5 Teammates', 'war'),
+    'cmp': ('5v5 Opponents', 'war'),
 }
 # Special teams WAR shown (without a ranking) for players that do not qualify
 SKATER_UNQUALIFIED_LABELS = {'ppl': 'Power Play (All)', 'pkl': 'Penalty Kill (All)'}
 # Special teams ice times that are only ranked for players who qualify for the matching WAR
 SKATER_QUALIFIED_BY = {'ppt': 'ppl', 'pkt': 'pkl'}
 
-# Minimum minutes of ice time to be ranked in a season (same as the pipeline's SKATER_MIN_TOI and GOALIE_MIN_TOI)
-SKATER_MIN_TOI = {
-    '2026-2027': 100,    # Current season (max games any team has played)
-    '2025-2026': 300,
-    '2024-2025': 300,
-    '2023-2024': 300,
-    '2022-2023': 300,
-    '2021-2022': 300,
-    '2020-2021': 200,    # Season shortened due to COVID
-    '2019-2020': 250,    # Season paused due to COVID
-    '2018-2019': 300,
-    '2017-2018': 300,
-    '2016-2017': 300,
-    '2015-2016': 300,
-    '2014-2015': 300,
-    '2013-2014': 300,
-    '2012-2013': 200,    # Season shortened due to lockout
-    '2011-2012': 300,
-    '2010-2011': 300,
-    '2009-2010': 300,
-}
-
-GOALIE_MIN_TOI = {
-    '2026-2027': 300,    # Current season (max games any team has played)
-    '2025-2026': 600,
-    '2024-2025': 600,
-    '2023-2024': 600,
-    '2022-2023': 600,
-    '2021-2022': 600,
-    '2020-2021': 400,    # Season shortened due to COVID
-    '2019-2020': 500,    # Season paused due to COVID
-    '2018-2019': 600,
-    '2017-2018': 600,
-    '2016-2017': 600,
-    '2015-2016': 600,
-    '2014-2015': 600,
-    '2013-2014': 600,
-    '2012-2013': 400,    # Season shortened due to lockout
-    '2011-2012': 600,
-    '2010-2011': 600,
-    '2009-2010': 600,
-}
-
 # Player group names for the branding note, and the stat sections: (title, five attribute keys top to bottom, None leaves a slot blank)
 POSITION_GROUP_NAMES = {'F': 'forwards', 'D': 'defensemen', 'G': 'goalies'}
 SKATER_STAT_SECTIONS = [
-    ('Individual', ['xgl', 'gol', 'ast', 'sho', 'hit']),
-    ('On-Ice', ['xfs', 'gfs', 'cfs', 'shp', 'svp']),
+    ('5v5 Individual', ['xgl', 'gol', 'sho', 'ast', 'hit']),
+    ('5v5 On-Ice', ['xfs', 'gfs', 'sfs', 'shp', 'svp']),
     ('Deployment', ['tmt', 'cmp', 'toi', 'ppt', 'pkt']),
 ]
 GOALIE_STAT_SECTIONS = [
-    ('Goals Saved', ['gsv', 'gsx', 'ldg', 'mdg', 'hdg']),
-    ('Shots Against', ['gag', 'tmd', 'lds', 'mds', 'hds']),
+    ('5v5 Saves', ['gsv', 'gsx', 'ldg', 'mdg', 'hdg']),
+    ('5v5 Shots Faced', ['gag', 'tmd', 'lds', 'mds', 'hds']),
     ('Starts', ['wrk', 'gre', 'qal', 'bad', 'awf']),
 ]
 # The title of the WAR section
 WAR_SECTION_TITLE = 'Wins Above Replacement'
-
-# Font sizes shared by every card (the largest that fit the longest text)
-STAT_FONT_SIZE = 60
-TITLE_FONT_SIZE = 75
-BRANDING_FONT_SIZE = 38
-
-# Games in a season that per-game rates are scaled to (2026-2027 onward has 84)
-SEASON_LENGTH = 82
-LONG_SEASON_LENGTH = 84
-LONG_SEASON_START_YEAR = 2026
-
-# Games that goalie rates are scaled to on the card (scores are stored per 60 minutes)
-GOALIE_RATE_GAMES = 60
 
 # Name shown on the card for each goalie stat and how its value is displayed
 GOALIE_STAT_DISPLAY = {
@@ -153,7 +99,6 @@ GOALIE_STAT_DISPLAY = {
 SKATER_ATTRIBUTE_LABELS = {key: display[0] for key, display in SKATER_STAT_DISPLAY.items()}
 GOALIE_ATTRIBUTE_LABELS = {key: display[0] for key, display in GOALIE_STAT_DISPLAY.items()}
 
-# === NAMING ===
 # Birth country codes to full names (an unlisted code is shown as is)
 COUNTRY_NAMES = {
     'AUS': 'Australia', 'AUT': 'Austria', 'BLR': 'Belarus', 'CAN': 'Canada', 'CHE': 'Switzerland', 'CZE': 'Czechia',
@@ -171,17 +116,6 @@ POSITION_NAMES = {
 # Handedness full names
 HANDEDNESS_NAMES = {
     'L': 'Left', 'R': 'Right',
-}
-
-# Symbols replaced in player names for the header (accents the heading font cannot draw; the others are drawn by draw_heading_text)
-SYMBOLS_TO_REPLACE = {
-    'â': 'a',
-    'ê': 'e',
-    'î': 'i',
-    'ô': 'o',
-    'ø': 'o',
-    'ñ': 'n',
-    'ç': 'c',
 }
 
 # === FONTS ===
@@ -228,8 +162,6 @@ SECONDARY_COLORS = {
     'ATL': (184, 97, 37),   'PHX': (21,71,52),
 }
 
-# Stat bar gradient (low to high), the same red, purple, and blue as the website
+# Stat bar gradient (red, purple, and blue)
 STAT_GRADIENT_COLORS = [(255, 99, 99), (210, 110, 210), (99, 99, 255)]
-# Share of the bar at each end that stays solid red or blue
-STAT_GRADIENT_SOLID_FRACTION = 0.12
 
