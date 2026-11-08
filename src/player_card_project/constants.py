@@ -58,8 +58,8 @@ POSITION_FOLDERS = {'F': 'forwards', 'D': 'defensemen', 'G': 'goalies'}
 
 # Name shown on the card for each skater stat and how its value is displayed (the kinds are formatted in card_utils.format_stat_value)
 SKATER_STAT_DISPLAY = {
-    'tot': ('Overall (All Situations)', 'war'), 'evo': ('ES Offense', 'war'), 'evd': ('ES Defense', 'war'),
-    'ppl': ('Power Play', 'war'), 'pkl': ('Penalty Kill', 'war'), 'fin': ('Finishing (All)', 'war'), 'pen': ('Penalties (All)', 'war'),
+    'tot': ('Overall', 'war'), 'evo': ('ES Offense', 'war'), 'evd': ('ES Defense', 'war'),
+    'ppl': ('Power Play', 'war'), 'pkl': ('Penalty Kill', 'war'), 'fin': ('Finishing', 'war'), 'pen': ('Penalties', 'war'),
     'xgl': ('xGoals', 'count'), 'gol': ('Goals', 'count'), 'ast': ('Primary Assists', 'count'), 'hit': ('Hits', 'count'),
     'sho': ('Shots', 'count'), 'sfs': ('Shot Share', 'percent'), 'xfs': ('xGoal Share', 'percent'), 'gfs': ('Goal Share', 'percent'),
     'shp': ('Shooting %', 'percent'), 'svp': ('Save %', 'percent'),
@@ -67,7 +67,7 @@ SKATER_STAT_DISPLAY = {
     'cmp': ('5v5 Opponents', 'war'),
 }
 # Special teams WAR shown (without a ranking) for players that do not qualify
-SKATER_UNQUALIFIED_LABELS = {'ppl': 'Power Play (All)', 'pkl': 'Penalty Kill (All)'}
+SKATER_UNQUALIFIED_LABELS = {'ppl': 'Power Play Unfiltered', 'pkl': 'Penalty Kill Unfiltered'}
 # Special teams ice times that are only ranked for players who qualify for the matching WAR
 SKATER_QUALIFIED_BY = {'ppt': 'ppl', 'pkt': 'pkl'}
 
@@ -88,7 +88,7 @@ WAR_SECTION_TITLE = 'Wins Above Replacement'
 
 # Name shown on the card for each goalie stat and how its value is displayed
 GOALIE_STAT_DISPLAY = {
-    'tot': ('Overall (All Situations)', 'signed60'), 'evs': ('Even Strength', 'signed60'), 'pkl': ('Penalty Kill', 'signed60'), 'gpp': ('Power Play', 'signed60'),
+    'tot': ('Overall', 'signed60'), 'evs': ('Even Strength', 'signed60'), 'pkl': ('Penalty Kill', 'signed60'), 'gpp': ('Power Play', 'signed60'),
     'gsv': ('Save %', 'save'), 'gag': ('Goals Against', 'negcount60'), 'gsx': ('GSAx', 'signed60'), 'ldg': ('LD GSAx', 'signed60'), 'mdg': ('MD GSAx', 'signed60'), 'hdg': ('HD GSAx', 'signed60'),
     'gre': ('Excellent Start %', 'rate'), 'qal': ('Quality Start %', 'rate'), 'bad': ('Bad Start %', 'rate'), 'awf': ('Awful Start %', 'rate'),
     'wrk': ('Game Start %', 'rate'), 'tmd': ('xGoals Against', 'negcount60'),
