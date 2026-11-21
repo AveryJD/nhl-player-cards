@@ -61,7 +61,7 @@ SKATER_STAT_DISPLAY = {
     'tot': ('Overall', 'war'), 'evo': ('ES Offense', 'war'), 'evd': ('ES Defense', 'war'),
     'ppl': ('Power Play', 'war'), 'pkl': ('Penalty Kill', 'war'), 'fin': ('Finishing', 'war'), 'pen': ('Penalties', 'war'),
     'xgl': ('xGoals', 'count'), 'gol': ('Goals', 'count'), 'ast': ('Primary Assists', 'count'), 'hit': ('Hits', 'count'),
-    'sho': ('Shots', 'count'), 'sfs': ('Shot Share', 'percent'), 'xfs': ('xGoal Share', 'percent'), 'gfs': ('Goal Share', 'percent'),
+    'sho': ('Shots', 'count'), 'sfs': ('Corsi Share', 'percent'), 'xfs': ('xGoal Share', 'percent'), 'gfs': ('Goal Share', 'percent'),
     'shp': ('Shooting %', 'percent'), 'svp': ('Save %', 'percent'),
     'toi': ('5v5 Ice Time', 'toi'), 'ppt': ('5v4 Ice Time', 'toi'), 'pkt': ('4v5 Ice Time', 'toi'), 'tmt': ('5v5 Teammates', 'war'),
     'cmp': ('5v5 Opponents', 'war'),
