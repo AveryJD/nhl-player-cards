@@ -49,8 +49,23 @@ ASSETS_DIR = os.path.join(DATA_DIR, 'card_data', 'assets')
 # CARD GENERATION CONSTANTS
 # ====================================================================================================
 
-# Date card data was updated on
-UPDATE_DATE = 'September 1, 2026'
+# Date card data was updated on, and the season it belongs to: only the current season's cards show this date (set it by hand when the data is refreshed)
+UPDATE_DATE = 'November 22, 2026'
+UPDATE_DATE_SEASON = '2026-2027'
+
+
+def update_date_for_season(season: str) -> str:
+    """
+    The "Updated" date shown on a season's cards: the manually set UPDATE_DATE for the current season, and June 1 of the season's last year for every earlier one (its data is final).
+
+    :param season: A str representing the season ('YYYY-YYYY')
+    :return: The date text for the card footer
+    """
+    if season == UPDATE_DATE_SEASON:
+        result = UPDATE_DATE
+    else:
+        result = f'June 1, {season.split("-")[1]}'
+    return result
 
 # === NAMING ===
 # Position to data folder name

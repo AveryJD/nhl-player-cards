@@ -432,7 +432,7 @@ def make_branding_section(player_row: pd.Series, mode: str = 'light') -> Image:
 
     # Get the number of games the data is scaled to and the updated date
     rate_games = player_row['Rate Games']
-    update_date = constants.UPDATE_DATE
+    update_date = constants.update_date_for_season(player_row['Season'])
 
     # Create branding section
     branding_section_width = 1880
