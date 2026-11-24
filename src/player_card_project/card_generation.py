@@ -127,6 +127,9 @@ def make_header_section(player_row: pd.Series, mode: str = 'light') -> Image:
     logo_scale = min((third_width - 80) / team_logo.width, (body_height - 2 * logo_margin) / team_logo.height)
     team_logo = team_logo.resize((round(team_logo.width * logo_scale), round(team_logo.height * logo_scale)), Image.Resampling.LANCZOS)
     logo_y = body_top + (body_height - team_logo.height) // 2
+    # The logo is faded behind the headshot
+    logo_opacity = 0.2
+    team_logo.putalpha(team_logo.getchannel('A').point(lambda value: round(value * logo_opacity)))
     header_section.paste(team_logo, (left_center_x - team_logo.width // 2, logo_y), team_logo)
 
     # Crop the player and scale them to fit, bottom-aligned with the header
