@@ -50,7 +50,7 @@ ASSETS_DIR = os.path.join(DATA_DIR, 'card_data', 'assets')
 # ====================================================================================================
 
 # Date card data was updated on, and the season it belongs to: only the current season's cards show this date (set it by hand when the data is refreshed)
-UPDATE_DATE = 'November 22, 2026'
+UPDATE_DATE = 'November 23, 2026'
 UPDATE_DATE_SEASON = '2026-2027'
 
 
