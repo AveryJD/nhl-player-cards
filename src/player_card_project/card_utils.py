@@ -488,11 +488,9 @@ def make_percentile_bar(
             ImageDraw.Draw(right_end).ellipse([(fill_width - height, 0), (fill_width - 1, height - 1)], fill=255)
             mask = ImageChops.multiply(left_end, right_end).crop((0, 0, fill_width, height))
 
-        # The gradient is stretched so it reaches the percentile's color a stretch before the end of the fill, which holds that color
-        hold = min(end_hold * height, 0.35 * fill_width)
-        fractions = np.minimum(np.arange(fill_width) / max(fill_width - hold, 1), 1) * fraction
-        fill = np.repeat(get_gradient_colors(fractions, solid_fraction).astype(np.uint8)[np.newaxis, :, :], height, axis=0)
-        bar.paste(Image.fromarray(fill, 'RGB').convert('RGBA'), (0, 0), mask)
+        # The fill is one solid color: the gradient's color at the percentile
+        color = tuple(int(channel) for channel in get_gradient_colors(np.array([fraction]), solid_fraction)[0])
+        bar.paste(Image.new('RGBA', (fill_width, height), color + (255,)), (0, 0), mask)
         label_xy, label_anchor = (fill_width - label_gap * height, height / 2), 'rm'
 
     if label:
